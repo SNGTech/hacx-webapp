@@ -1,0 +1,34 @@
+.hacx {
+    font-size: 1.5em;
+    letter-spacing: 0.1rem;
+    color: var(--text-colour);
+    font-weight: 600;
+}
+
+.navbar {
+    background-color: var(--navbar-colour);
+    border-bottom: 1px solid #d8773945;
+}
+
+nav a {
+    text-decoration: none;
+    padding: 1rem;
+    color: var(--text-colour);
+    background-color: transparent;
+    font-size: 1em;
+    font-weight: normal;
+    transition: all 200ms ease;
+    border-radius: 20px;
+}
+
+nav a:hover {
+    scale: 1.1;
+    font-weight: 600;
+    background-color: var(--selection-colour);
+}
+
+nav a.active {
+    scale: 1.1;
+    font-weight: 600;
+    background-color: var(--selection-colour)
+}
