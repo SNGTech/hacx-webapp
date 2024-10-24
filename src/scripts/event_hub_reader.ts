@@ -24,19 +24,19 @@ async function printError(err: { message: any; }) {
 // - Telemetry is sent in the message body
 // - The device can add arbitrary properties to the message
 // - IoT Hub adds system properties, such as Device Id, to the message.
-async function printMessages(events: any) {
+async function retrieveMessages(events: any, callback: Function) {
   for (let i = 0; i < events.length; ++i) {
+    callback(events[i]);
+
     console.log("Telemetry received: ");
     console.log(JSON.stringify(events[i].body));
-    console.log("Enqueued Time UTC: ");
-    console.log(JSON.stringify(events[i].enqueuedTimeUtc));
-    console.log("System properties (set by IoT Hub): ");
-    console.log(JSON.stringify(events[i].systemProperties["iothub-connection-device-id"]));
-    console.log("");
+    console.log("Enqueued Time UTC: " + JSON.stringify(events[i].enqueuedTimeUtc));
+    console.log("System properties (set by IoT Hub): " + JSON.stringify(events[i].systemProperties["iothub-connection-device-id"]));
+    console.log("----------------------------------------------------------");
   }
 }
 
-async function startEventReader() {
+async function startEventReader(callback: Function) {
   console.log("IoT Hub Quickstarts - Read device to cloud messages.");
 
   // If using websockets, uncomment the webSocketOptions below
@@ -61,7 +61,7 @@ async function startEventReader() {
   // To subscribe to messages from a single partition, use the overload of the same method.
   try {
     consumerClient.subscribe({
-      processEvents: printMessages,
+      processEvents: (events, context) => retrieveMessages(events, callback),
       processError: printError,
     });
   } catch(err: any) {
