@@ -4,7 +4,7 @@ import {
   createBrowserRouter,
   RouterProvider
 } from "react-router-dom"
-import { useMsal, MsalProvider } from "@azure/msal-react";
+import { MsalProvider } from "@azure/msal-react";
  
 import App from './App';
 import msalConfig from './authProvider';
@@ -22,7 +22,7 @@ import "@fontsource/roboto/700.css";
 import { ThemeProvider } from "@emotion/react";
 import { createTheme } from "@mui/material";
 import { PublicClientApplication } from "@azure/msal-browser";
-import { basename } from "path";
+
 
 // Create an instance of PublicClientApplication
 const msalInstance = new PublicClientApplication(msalConfig);
