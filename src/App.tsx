@@ -4,6 +4,7 @@ import "./App.css";
 import "./variables.css";
 import { MsalAuthenticationTemplate } from "@azure/msal-react";
 import { InteractionType } from "@azure/msal-browser";
+import 'react-material-symbols/rounded';
 
 function App() {
   return (

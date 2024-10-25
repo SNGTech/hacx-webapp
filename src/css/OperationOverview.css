@@ -2,3 +2,35 @@
     height: 100%;
 	margin: 8px auto;
 }
+
+.sensor-data {
+    font-size: 1.75em;
+    font-weight: 500;
+}
+
+.alerts-container {
+    margin-top: 1.25rem;
+    padding: 1rem 2rem;
+    border-radius: 20px;
+}
+
+.alerts-container p { 
+    font-weight: 500;
+    font-size: 1.25rem;
+}
+
+.warn {
+    background-color: #eaa093;
+}
+
+.warn p {
+    color: #911f0e;
+}
+
+.no-warning {
+    background-color: #93eac7;
+}
+
+.no-warning p {
+    color: #0e9142;
+}
