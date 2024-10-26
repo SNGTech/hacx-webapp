@@ -4,7 +4,7 @@
 }
 
 .sensor-data {
-    font-size: 1.75em;
+    font-size: 1.55em;
     font-weight: 500;
 }
 
@@ -16,7 +16,7 @@
 
 .alerts-container p { 
     font-weight: 500;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
 }
 
 .warn {

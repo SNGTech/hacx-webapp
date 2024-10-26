@@ -31,21 +31,21 @@ const Item = styled(Paper)(({ theme }) => ({
   }),
 }));
 
-
 const OperationOverview = () => {
   const location = useLocation();
   console.log(location);
   const { operation } = location.state;
 
-  const [reactionTimeModBtnDisabled, setReactionTimeModBtnDisabled] = useState(false);
+  const [reactionTimeModBtnDisabled, setReactionTimeModBtnDisabled] =
+    useState(false);
 
   const [telemetryData, setTelemetryData] = useState({});
   const [temperatureData, setTemperatureData] = useState([{}]);
-  const [gaitData, setGaitData] = useState([{}]); 
+  const [gaitData, setGaitData] = useState([{}]);
 
   //Under comparison with threshold
   const [alerts, setAlerts] = useState({});
-  const [isBrainTempHigh, setIsBrainTempHigh] = useState(false); 
+  const [isBrainTempHigh, setIsBrainTempHigh] = useState(false);
   const [isReactionTimeSlow, setIsReactionTimeSlow] = useState(false);
   const [isDilationOutOfRange, setDilationOutOfRange] = useState(false);
 
@@ -54,12 +54,12 @@ const OperationOverview = () => {
   // Function to fetch threshold parameters
   const fetchThresholdParameters = async () => {
     try {
-      const parameters = await getThresholdParameters(); 
+      const parameters = await getThresholdParameters();
       setThreshold({
         temperature: parameters.BrainTemp,
         reaction_time: parameters.ReactionTime,
         max_dilation: parameters.MaxDilation,
-        min_dilation: parameters.MinDilation
+        min_dilation: parameters.MinDilation,
       });
     } catch (error) {
       console.error("Error fetching threshold parameters:", error);
@@ -102,9 +102,13 @@ const OperationOverview = () => {
   useEffect(() => {
     // Check if head temperature exceeds threshold
     const alerts_payload = {
-      is_temperature_high: telemetryData.head_temperature > threshold.temperature,
-      is_reaction_slow: telemetryData.last_reaction_time_ms > threshold.reaction_time,
-      is_dilation_ofr: telemetryData.dilation_diameter >= threshold.min_dilation && telemetryData.dilation_diameter <= threshold.max_dilation
+      is_temperature_high:
+        telemetryData.head_temperature > threshold.temperature,
+      is_reaction_slow:
+        telemetryData.last_reaction_time_ms > threshold.reaction_time,
+      is_dilation_ofr:
+        telemetryData.dilation_diameter >= threshold.min_dilation &&
+        telemetryData.dilation_diameter <= threshold.max_dilation,
     };
     setAlerts(alerts_payload);
   }, [telemetryData]);
@@ -187,15 +191,15 @@ const OperationOverview = () => {
               Start Reaction Time Test (Alice Hua)
             </Button>
           </Stack>
-          <Stack direction="row" spacing={2}>
-            <Item>{operation.department}</Item>
-            <Item>{operation.opcode}</Item>
-          </Stack>
         </div>
-        <div className="flex-grow mt-6" style={{ height: "75vh" }}>
+        <div className="flex-grow" style={{ height: "75vh" }}>
           <Grid2 container spacing={10} style={{ height: "75vh" }}>
             <Grid2 size={3}>
               <Stack spacing={3}>
+                <Stack direction="row" spacing={2}>
+                  <Item>{operation.department}</Item>
+                  <Item>{operation.opcode}</Item>
+                </Stack>
                 <Card sx={{ minWidth: 275 }}>
                   <CardContent>
                     <Typography
@@ -226,7 +230,23 @@ const OperationOverview = () => {
                   <Typography variant="h5" fontWeight={500}>
                     Inspecting: Alice Hua
                   </Typography>
-                  <div className="flex items-center gap-4 text-red-500 mt-4">
+                  {alerts.is_temperature_high && alerts.is_dilation_ofr ? (
+                    <div className="flex items-center gap-4 mt-4 text-red-500 bg-orange-200 p-2 rounded-3xl">
+                      <MaterialSymbol
+                        icon="warning"
+                        size={40}
+                        fill
+                        grade={-25}
+                      />
+                      <p className="sensor-data">
+                        HEAT STRESS: HIGH RISK OF AMS, please do a reaction test
+                        to verify
+                      </p>
+                    </div>
+                  ) : (
+                    <div></div>
+                  )}
+                  <div className="flex items-center gap-4 text-red-500 mt-3">
                     <MaterialSymbol
                       icon="mode_heat"
                       size={40}
@@ -239,15 +259,17 @@ const OperationOverview = () => {
                     </p>
                   </div>
                   {alerts.is_temperature_high ? (
-                      <div className="alerts-container warn mb-6">
-                        <p>
-                          Warning: Brain temperature is above normal! Please rest in a cool environment.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="alerts-container no-warning mb-6">
-                        <p>Normal: Brain Temperature within normal range.</p> {/* This line remains unchanged */}
-                      </div>
+                    <div className="alerts-container warn mb-5">
+                      <p>
+                        Warning: Brain temperature is above normal! Please rest
+                        in a cool environment.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="alerts-container no-warning mb-6">
+                      <p>Normal: Brain Temperature within normal range.</p>{" "}
+                      {/* This line remains unchanged */}
+                    </div>
                   )}
                   <Typography
                     variant="h5"
@@ -274,16 +296,14 @@ const OperationOverview = () => {
                   </div>
                   {alerts.is_dilation_ofr ? (
                     <div className="alerts-container warn mb-6">
-                      <p>
-                      Warning: Eye dilation diameter out of range
-                      </p>
+                      <p>Warning: Eye dilation diameter out of range</p>
                     </div>
-                    ): (  <div className="alerts-container no-warning mb-6">
+                  ) : (
+                    <div className="alerts-container no-warning mb-6">
                       <p>Normal: Eye dilation diameter within normal range</p>
                     </div>
-                    )
-                  }
-                  
+                  )}
+
                   <Typography
                     variant="h5"
                     fontWeight={500}
@@ -303,10 +323,10 @@ const OperationOverview = () => {
                   </div>
                   {alerts.is_reaction_slow ? (
                     <div className="alerts-container warn mb-6">
-                    <p>
-                      Warning: Reaction Time slow (Above Threshold)
-                    </p>
-                    </div>) : (<div className="alerts-container no-warning mb-6">
+                      <p>Warning: Reaction Time slow (Above Threshold)</p>
+                    </div>
+                  ) : (
+                    <div className="alerts-container no-warning mb-6">
                       <p>Normal: Reaction Time within normal range</p>
                     </div>
                   )}

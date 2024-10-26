@@ -12,7 +12,7 @@
 
 nav a {
     text-decoration: none;
-    padding: 1rem;
+    padding: 0.8rem;
     color: var(--text-colour);
     background-color: transparent;
     font-size: 1em;
