@@ -44,31 +44,31 @@ const OperationOverview = () => {
   const [gaitData, setGaitData] = useState([{}]); 
 
   //Under comparison with threshold
-  const [isBrainTempHigh, setIsBrainTempHigh] = useState<boolean>(false); 
-  const [isReactionTimeSlow, setIsReactionTimeSlow] = useState<boolean>(false);
-  const [isDilationOutOfRange, setDilationOutOfRange] = useState<boolean>(false);
+  const [alerts, setAlerts] = useState({});
+  const [isBrainTempHigh, setIsBrainTempHigh] = useState(false); 
+  const [isReactionTimeSlow, setIsReactionTimeSlow] = useState(false);
+  const [isDilationOutOfRange, setDilationOutOfRange] = useState(false);
 
-  const [brainTempThresh, setBrainTempThresh] = useState<number>(0);
-  const [reactionTimeThresh, setReactionTimeThresh] = useState<number>(0);
-  const [dilationThresh, setDilationThresh] = useState<number>(0);
+  const [threshold, setThreshold] = useState({});
 
   // Function to fetch threshold parameters
   const fetchThresholdParameters = async () => {
     try {
       const parameters = await getThresholdParameters(); 
-      setBrainTempThresh(parameters.BrainTemp);
-      setReactionTimeThresh(parameters.ReactionTime);
-      setDilationThresh(parameters.MaxDilation - parameters.MinDilation)
+      setThreshold({
+        temperature: parameters.BrainTemp,
+        reaction_time: parameters.ReactionTime,
+        max_dilation: parameters.MaxDilation,
+        min_dilation: parameters.MinDilation
+      });
     } catch (error) {
       console.error("Error fetching threshold parameters:", error);
     }
   };
 
   useEffect(() => {
-    fetchThresholdParameters(); // Call to fetch threshold when component mounts
-  }, []);
+    fetchThresholdParameters();
 
-  useEffect(() => {
     startEventReader((data: any) => {
       const payload = {
         head_temperature: data.body["head_temperature"],
@@ -96,23 +96,18 @@ const OperationOverview = () => {
         return newTelemetry;
       });
       setTelemetryData(payload);
-
-      
-      // Check if head temperature exceeds threshold
-      const isTempHigh = payload.head_temperature > brainTempThresh;
-      setIsBrainTempHigh(isTempHigh); // Update the state with the result
-
-      //Check if Reaction Time exceeds threshold
-      const isLongReactionTime = payload.last_reaction_time_ms > reactionTimeThresh;
-      setIsReactionTimeSlow(isLongReactionTime);
-
-      //Check if Dilation exceeds threshold
-      const isDilationOutOfRange = (payload.dilation_diameter) > dilationThresh ;
-      setDilationOutOfRange(isDilationOutOfRange);
     });
-  }, [brainTempThresh, reactionTimeThresh, dilationThresh]);
+  }, []);
 
-  
+  useEffect(() => {
+    // Check if head temperature exceeds threshold
+    const alerts_payload = {
+      is_temperature_high: telemetryData.head_temperature > threshold.temperature,
+      is_reaction_slow: telemetryData.last_reaction_time_ms > threshold.reaction_time,
+      is_dilation_ofr: telemetryData.dilation_diameter >= threshold.min_dilation && telemetryData.dilation_diameter <= threshold.max_dilation
+    };
+    setAlerts(alerts_payload);
+  }, [telemetryData]);
 
   // useEffect(() => {}, [isAuthenticated, accessToken]);
   // if (accessToken !== "") {
@@ -243,7 +238,7 @@ const OperationOverview = () => {
                       deg. Cel.
                     </p>
                   </div>
-                  {isBrainTempHigh ? (
+                  {alerts.is_temperature_high ? (
                       <div className="alerts-container warn mb-6">
                         <p>
                           Warning: Brain temperature is above normal! Please rest in a cool environment.
@@ -277,7 +272,7 @@ const OperationOverview = () => {
                       {parseFloat(telemetryData.dilation_diameter).toFixed(2)}cm
                     </p>
                   </div>
-                  {isDilationOutOfRange ? (
+                  {alerts.is_dilation_ofr ? (
                     <div className="alerts-container warn mb-6">
                       <p>
                       Warning: Eye dilation diameter out of range
@@ -306,7 +301,7 @@ const OperationOverview = () => {
                       {parseInt(telemetryData.last_reaction_time_ms)}ms
                     </p>
                   </div>
-                  {isReactionTimeSlow ? (
+                  {alerts.is_reaction_slow ? (
                     <div className="alerts-container warn mb-6">
                     <p>
                       Warning: Reaction Time slow (Above Threshold)
