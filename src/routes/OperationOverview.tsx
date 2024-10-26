@@ -10,7 +10,6 @@ import {
 import Paper from "@mui/material/Paper";
 import { styled } from "@mui/material/styles";
 import { useLocation } from "react-router-dom";
-import { models } from "powerbi-client";
 import "../css/OperationOverview.css";
 import { useEffect, useState } from "react";
 import startEventReader from "../scripts/event_hub_reader";
@@ -19,6 +18,7 @@ import ZGaitChart from "../components/ZGaitChart";
 import { MaterialSymbol } from "react-material-symbols";
 import TempEyeImage from "../imgs/eye.png";
 import HashLoader from "react-spinners/HashLoader";
+import { getThresholdParameters } from "../scripts/cosmo_db";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -31,26 +31,42 @@ const Item = styled(Paper)(({ theme }) => ({
   }),
 }));
 
+
 const OperationOverview = () => {
   const location = useLocation();
   console.log(location);
   const { operation } = location.state;
 
-  // const { instance, inProgress, accounts } = useMsal();
-  // const isAuthenticated = useIsAuthenticated();
-  const [accessToken, setAccessToken] = useState("");
-  const [reactionTimeModBtnDisabled, setReactionTimeModBtnDisabled] =
-    useState(false);
+  const [reactionTimeModBtnDisabled, setReactionTimeModBtnDisabled] = useState(false);
 
   const [telemetryData, setTelemetryData] = useState({});
   const [temperatureData, setTemperatureData] = useState([{}]);
-  const [gaitData, setGaitData] = useState([{}]);
+  const [gaitData, setGaitData] = useState([{}]); 
 
-  // useEffect(() => {
-  //   if (!isAuthenticated && inProgress === InteractionStatus.None) {
-  //       instance.loginPopup();
-  //   }
-  // }, [isAuthenticated, inProgress, instance]);
+  //Under comparison with threshold
+  const [isBrainTempHigh, setIsBrainTempHigh] = useState<boolean>(false); 
+  const [isReactionTimeSlow, setIsReactionTimeSlow] = useState<boolean>(false);
+  const [isDilationOutOfRange, setDilationOutOfRange] = useState<boolean>(false);
+
+  const [brainTempThresh, setBrainTempThresh] = useState<number>(0);
+  const [reactionTimeThresh, setReactionTimeThresh] = useState<number>(0);
+  const [dilationThresh, setDilationThresh] = useState<number>(0);
+
+  // Function to fetch threshold parameters
+  const fetchThresholdParameters = async () => {
+    try {
+      const parameters = await getThresholdParameters(); 
+      setBrainTempThresh(parameters.BrainTemp);
+      setReactionTimeThresh(parameters.ReactionTime);
+      setDilationThresh(parameters.MaxDilation - parameters.MinDilation)
+    } catch (error) {
+      console.error("Error fetching threshold parameters:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchThresholdParameters(); // Call to fetch threshold when component mounts
+  }, []);
 
   useEffect(() => {
     startEventReader((data: any) => {
@@ -80,8 +96,23 @@ const OperationOverview = () => {
         return newTelemetry;
       });
       setTelemetryData(payload);
+
+      
+      // Check if head temperature exceeds threshold
+      const isTempHigh = payload.head_temperature > brainTempThresh;
+      setIsBrainTempHigh(isTempHigh); // Update the state with the result
+
+      //Check if Reaction Time exceeds threshold
+      const isLongReactionTime = payload.last_reaction_time_ms > reactionTimeThresh;
+      setIsReactionTimeSlow(isLongReactionTime);
+
+      //Check if Dilation exceeds threshold
+      const isDilationOutOfRange = (payload.dilation_diameter) > dilationThresh ;
+      setDilationOutOfRange(isDilationOutOfRange);
     });
-  }, []);
+  }, [brainTempThresh, reactionTimeThresh, dilationThresh]);
+
+  
 
   // useEffect(() => {}, [isAuthenticated, accessToken]);
   // if (accessToken !== "") {
@@ -212,12 +243,17 @@ const OperationOverview = () => {
                       deg. Cel.
                     </p>
                   </div>
-                  <div className="alerts-container warn mb-6">
-                    <p>
-                      Warning: Brain temperature is above normal! Please rest in
-                      a cool environment
-                    </p>
-                  </div>
+                  {isBrainTempHigh ? (
+                      <div className="alerts-container warn mb-6">
+                        <p>
+                          Warning: Brain temperature is above normal! Please rest in a cool environment.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="alerts-container no-warning mb-6">
+                        <p>Normal: Brain Temperature within normal range.</p> {/* This line remains unchanged */}
+                      </div>
+                  )}
                   <Typography
                     variant="h5"
                     fontWeight={500}
@@ -241,9 +277,18 @@ const OperationOverview = () => {
                       {parseFloat(telemetryData.dilation_diameter).toFixed(2)}cm
                     </p>
                   </div>
-                  <div className="alerts-container no-warning mb-6">
-                    <p>Normal: Eye dilation diameter within normal range</p>
-                  </div>
+                  {isDilationOutOfRange ? (
+                    <div className="alerts-container warn mb-6">
+                      <p>
+                      Warning: Eye dilation diameter out of range
+                      </p>
+                    </div>
+                    ): (  <div className="alerts-container no-warning mb-6">
+                      <p>Normal: Eye dilation diameter within normal range</p>
+                    </div>
+                    )
+                  }
+                  
                   <Typography
                     variant="h5"
                     fontWeight={500}
@@ -261,9 +306,15 @@ const OperationOverview = () => {
                       {parseInt(telemetryData.last_reaction_time_ms)}ms
                     </p>
                   </div>
-                  <div className="alerts-container no-warning mb-6">
-                    <p>Normal: Reaction Time within normal range</p>
-                  </div>
+                  {isReactionTimeSlow ? (
+                    <div className="alerts-container warn mb-6">
+                    <p>
+                      Warning: Reaction Time slow (Above Threshold)
+                    </p>
+                    </div>) : (<div className="alerts-container no-warning mb-6">
+                      <p>Normal: Reaction Time within normal range</p>
+                    </div>
+                  )}
                 </Stack>
               </Grid2>
               <Grid2 size={7}>
