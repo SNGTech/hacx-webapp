@@ -7,6 +7,8 @@ interface Threshold {
     BrainTemp: number;
     MinDilation: number;
     MaxDilation: number;
+    stepWidth: number;
+    cadence : number;
 }
 
 const connectionString = "M4tux18JDvRDyirwGWrNHNcTgQgfz4WqawyZraWVo0N6ZHaStpy2ucLtkjVSYlC4SevzACGNFKLiACDb2Z1RPw==";
@@ -24,7 +26,9 @@ const defaultThreshold: Threshold = {
     ReactionTime: 290,
     BrainTemp: 38.2,
     MinDilation: 2.5,
-    MaxDilation: 5.0
+    MaxDilation: 5.0,
+    stepWidth: 50,
+    cadence: 100
 };
 
 // Async function to handle upsert
@@ -80,6 +84,8 @@ export async function updateThresholdParameter(updates: Partial<Threshold>): Pro
             BrainTemp: updates.BrainTemp !== undefined ? updates.BrainTemp : item.BrainTemp,
             MinDilation: updates.MinDilation !== undefined ? updates.MinDilation : item.MinDilation,
             MaxDilation: updates.MaxDilation !== undefined ? updates.MaxDilation : item.MaxDilation,
+            stepWidth: updates.stepWidth !== undefined ? updates.stepWidth : item.stepWidth,
+            cadence: updates.cadence !== undefined ? updates.cadence : item.cadence,
             _rid: item._rid,
             _self: item._self,
             _etag: item._etag,

@@ -9,7 +9,8 @@ const Calibration = () => {
   const [brainTemp, setBrainTemp] = useState<number>(38.2);
   const [minDilation, setMinDilation] = useState<number>(2.5);
   const [maxDilation, setMaxDilation] = useState<number>(5.0);
-
+  const [stepWidth, setStepWidth] = useState<number>(50);
+  const [cadence, setCadence] = useState<number>(100);
   // Function to fetch threshold parameters
   const fetchThresholdParameters = async () => {
     try {
@@ -18,6 +19,8 @@ const Calibration = () => {
       setBrainTemp(parameters.BrainTemp);
       setMinDilation(parameters.MinDilation);
       setMaxDilation(parameters.MaxDilation);
+      setStepWidth(parameters.stepWidth);
+      setCadence(parameters.cadence);
     } catch (error) {
       console.error("Error fetching threshold parameters:", error);
     }
@@ -35,6 +38,8 @@ const Calibration = () => {
       BrainTemp: brainTemp,
       MinDilation: minDilation,
       MaxDilation: maxDilation,
+      stepWidth: stepWidth,
+      cadence: cadence
     });
 
     try {
@@ -43,6 +48,9 @@ const Calibration = () => {
         BrainTemp: brainTemp,
         MinDilation: minDilation,
         MaxDilation: maxDilation,
+        stepWidth: stepWidth,
+        cadence: cadence
+        
       });
       toast.success("Thresholds updated successfully!", {
         position: "top-left", // Position of the toast
@@ -91,7 +99,36 @@ const Calibration = () => {
                 marginBottom: "16px",
               }}
             >
-              <Button variant="contained">Change Gait</Button>
+              <TextField
+              label="Step Width"
+              variant="outlined"
+              type="number"
+              size="small"
+              margin="normal"
+              fullWidth
+              value={stepWidth}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                  setStepWidth(value === '' ? 0 : parseFloat(value));
+                }
+              }}
+            />
+              <TextField
+              label="Cadence"
+              variant="outlined"
+              type="number"
+              size="small"
+              margin="normal"
+              fullWidth
+              value={cadence}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                  setCadence(value === '' ? 0 : parseFloat(value));
+                }
+              }}
+            />
             </Box>
           </Box>
 
