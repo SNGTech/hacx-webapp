@@ -11,7 +11,7 @@ function App() {
     <MsalAuthenticationTemplate interactionType={InteractionType.Redirect}>
     <div className="">
       <Navbar />
-      <div className="container-lg mx-auto p-6">
+      <div className="container-lg mx-auto p-6 py-5">
         <Outlet />
       </div>
     </div>

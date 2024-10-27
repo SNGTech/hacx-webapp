@@ -105,7 +105,8 @@ const OperationOverview = () => {
       is_temperature_high:
         telemetryData.head_temperature > threshold.temperature,
       is_reaction_slow:
-        telemetryData.last_reaction_time_ms > threshold.reaction_time,
+        telemetryData.last_reaction_time_ms == "> 1s" || (telemetryData.last_reaction_time_ms != "No Data" &&
+        parseInt(String(telemetryData.last_reaction_time_ms).replace("ms", "")) > threshold.reaction_time),
       is_dilation_ofr:
         telemetryData.dilation_diameter >= threshold.min_dilation &&
         telemetryData.dilation_diameter <= threshold.max_dilation,
@@ -158,14 +159,13 @@ const OperationOverview = () => {
   } else {
     return (
       <div className="flex flex-col flex-grow">
-        <div>
+        <div className="flex justify-between items-center mb-4">
           <Stack
             direction="row"
             spacing={5}
             sx={{
               alignItems: "center",
             }}
-            className="mb-4"
           >
             <Typography variant="h4" gutterBottom>
               {operation.title}
@@ -191,6 +191,14 @@ const OperationOverview = () => {
               Start Reaction Time Test (Alice Hua)
             </Button>
           </Stack>
+          <div className="flex items-center gap-4">
+            <p>
+              Telemetry Data Out of Sync? Refresh Here
+            </p>
+            <div onClick={() => window.location.reload()} className="cursor-pointer">
+              <MaterialSymbol icon="refresh" size={40} fill grade={-25} />
+            </div>
+          </div>
         </div>
         <div className="flex-grow" style={{ height: "75vh" }}>
           <Grid2 container spacing={10} style={{ height: "75vh" }}>
@@ -318,7 +326,7 @@ const OperationOverview = () => {
                     <MaterialSymbol icon="pace" size={40} fill grade={-25} />
                     <p className="sensor-data">
                       Reaction Time:{" "}
-                      {parseInt(telemetryData.last_reaction_time_ms)}ms
+                      {telemetryData.last_reaction_time_ms}
                     </p>
                   </div>
                   {alerts.is_reaction_slow ? (
