@@ -10,11 +10,11 @@ const eventHubsCompatiblePath = "hacx-gitgud-iothub";
 
 // Primary key for the "service" policy to read messages
 // az iot hub policy show --name service --query primaryKey --hub-name {your IoT Hub name}
-const iotHubSasKey = "jr5/6M9zrFGAXsG7IF7rEZWwZ504AL6Y3AIoTLBZTyI=";
+const iotHubSasKey = "jWyEov7O2x/CJ82hQSGVAszec1+4uOT/bAIoTOwCadE=";
 
 // If you have access to the Event Hub-compatible connection string from the Azure portal, then
 // you can skip the Azure CLI commands above, and assign the connection string directly here.
-const connectionString = `Endpoint=${eventHubsCompatibleEndpoint};EntityPath=${eventHubsCompatiblePath};SharedAccessKeyName=service;SharedAccessKey=${iotHubSasKey}`;
+const connectionString = "Endpoint=sb://iothub-ns-hacx-gitgu-56871046-a4a6e44fd3.servicebus.windows.net/;SharedAccessKeyName=iothubowner;SharedAccessKey=W825ejAIXhwOtDwQDqzYVstazlcuaQ6NmAIoTGeyQRQ=;EntityPath=hacx-gitgud-iothub"
 
 async function printError(err: { message: any; }) {
   console.log(err.message);

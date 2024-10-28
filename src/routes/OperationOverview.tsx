@@ -14,7 +14,7 @@ import "../css/OperationOverview.css";
 import { useEffect, useState } from "react";
 import startEventReader from "../scripts/event_hub_reader";
 import TemperatureChart from "../components/TemperatureChart";
-import ZGaitChart from "../components/ZGaitChart";
+import YGaitChart from "../components/YGaitChart";
 import { MaterialSymbol } from "react-material-symbols";
 import TempEyeImage from "../imgs/eye.png";
 import HashLoader from "react-spinners/HashLoader";
@@ -45,10 +45,6 @@ const OperationOverview = () => {
 
   //Under comparison with threshold
   const [alerts, setAlerts] = useState({});
-  const [isBrainTempHigh, setIsBrainTempHigh] = useState(false);
-  const [isReactionTimeSlow, setIsReactionTimeSlow] = useState(false);
-  const [isDilationOutOfRange, setDilationOutOfRange] = useState(false);
-
   const [threshold, setThreshold] = useState({});
 
   // Function to fetch threshold parameters
@@ -72,11 +68,16 @@ const OperationOverview = () => {
     startEventReader((data: any) => {
       const payload = {
         head_temperature: data.body["head_temperature"],
-        z_gait_left: data.body["z_gait_left"],
-        z_gait_right: data.body["z_gait_right"],
+        y_gait_left: data.body["y_gait_left"],
+        cadence_left: data.body["cadence_left"],
+        stepWidth_left: data.body["stepWidth_left"],
+        y_gait_right: data.body["y_gait_right"],
+        cadence_right: data.body["cadence_right"],
+        stepWidth_right: data.body["stepWidth_right"],
         dilation_diameter: data.body["dilation_diameter"],
         last_reaction_time_ms: data.body["last_reaction_time_ms"],
         last_reaction_timestamp: data.body["last_reaction_timestamp"],
+        cam_base64: data.body["camera_base64"],
         timestamp: data.enqueuedTimeUtc.toLocaleTimeString("it-IT"),
       };
       setTemperatureData((telemetry) => {
@@ -289,7 +290,7 @@ const OperationOverview = () => {
                   <Typography variant="h6" fontWeight={400}>
                     Real-time Image Captured
                   </Typography>
-                  <img src={TempEyeImage} width="120px" className="mt-2"></img>
+                  <img src={`data:image/png;base64, ${telemetryData.cam_base64}`} width="120px" className="mt-2"></img>
                   <div className="flex items-center gap-4 mt-4">
                     <MaterialSymbol
                       icon="visibility"
@@ -343,10 +344,27 @@ const OperationOverview = () => {
               <Grid2 size={7}>
                 <div className="flex flex-col h-full">
                   <TemperatureChart data={temperatureData} />
-                  <ZGaitChart data={gaitData} />
+                  <YGaitChart data={gaitData} />
                   <div className="ml-8">
                     <Typography variant="h6" fontWeight={400}>
-                      Gait Distance (z-acceleration)
+                      Left
+                    </Typography>
+                    <div className="flex gap-4">
+                    <MaterialSymbol
+                        icon="footprint"
+                        size={40}
+                        fill
+                        grade={-25}
+                      />
+                      <p className="sensor-data mr-4">
+                        Step Width: {parseInt(telemetryData.stepWidth_left)}m
+                      </p>
+                      <p className="sensor-data">
+                        Cadence: {parseInt(telemetryData.cadence_left)} steps/min
+                      </p>
+                    </div>
+                    <Typography variant="h6" fontWeight={400}>
+                      Right
                     </Typography>
                     <div className="flex items-center gap-4 mt-4">
                       <MaterialSymbol
@@ -356,10 +374,10 @@ const OperationOverview = () => {
                         grade={-25}
                       />
                       <p className="sensor-data mr-4">
-                        Left: {parseInt(telemetryData.z_gait_left)}m
+                        Step Width: {parseInt(telemetryData.stepWidth_left)}m
                       </p>
                       <p className="sensor-data">
-                        Right: {parseInt(telemetryData.z_gait_right)}m
+                        Cadence: {parseInt(telemetryData.cadence_left)} steps/min
                       </p>
                     </div>
                     <div className="alerts-container warn mb-6">
